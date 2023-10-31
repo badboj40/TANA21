@@ -24,7 +24,7 @@ for n = [10 20 40 80]
     h = (b-a)/n;
 
     new_error = norm(y_ex(:)-y(:), 'inf');
-    printf("n: %i, Error norm: %f, Error ratio: %f\n", n, new_error, error/new_error);
+    fprintf("n: %i, Error norm: %f, Error ratio: %f\n", n, new_error, error/new_error);
     error = new_error;
 end
 
