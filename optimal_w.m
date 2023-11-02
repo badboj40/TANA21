@@ -1,30 +1,26 @@
-% Estimating y'' = cos(x)y' - sin(x)y, 0 <= x <= 3pi/2 with y(0)=1 and y(3pi/2)= 1/e
-
-
-p = @(x) cos(x);
-q = @(x) -sin(x);
-r = @(x) zeros(size(x));
-a = 0;
-b = 3*pi/2;
-cL = 1;
-cR = 1/exp(1);
-
-f = @(x) exp(sin(x));
-
-x_reference = linspace(a, b, 1000);
-y_reference = f(x_reference);
-pl = plot(x_reference, y_reference, 'b')
-
-for n = [10 20 40 80]
-% for n = [20]
-    [x, y] = ODE_solver(p, q, r, a, b, cL, cR, n);
+% Finding optimal w-values for N = [10, 20, 40, 80]
+for N=[10 20 40 80]
+    A = full(gallery('tridiag',N,-1,2,-1));
+    known_x = ones(N,1); % make known solution vector of 1s
+    manuf_b = A*known_x; % manufacture the right-hand-side
+    x0 = zeros(N, 1);
+    M = 100;
+    w = zeros(M, 1);
+    iterations = zeros(M, 1);
+    
+    for i = 1:M
+        w_i = 1 + (i-1)/M;
+        [x,k] = SOR(A, manuf_b, x0, 1e-11, w_i);
+        w(i) = w_i;
+        iterations(i) = k;
+    end
+    
+    
+    semilogy(w, iterations);
     hold on;
-    plot(x, y, 'o');
-    y_ex = f(x);
-    h = (b-a)/n;
-    err = abs(y_ex(:) - y(:));
-    err_ratio = (err(2:end) - err(1:end-1)) ./ h;
-    err_norm = norm(err, 'inf');
+    legend('N = 10', 'N = 20', 'N = 40', 'N = 80')
+    
+    [minVal, k] = min(iterations);
+    
+    fprintf("N: %i, Optimal w: %f\n", N, w(k));
 end
-
-waitfor(pl);
