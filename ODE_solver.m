@@ -1,7 +1,8 @@
-function [x, y] = ODE_solver(p, q, r, a, b, cL, cR, n)
+function [x, y] = ODE_solver(p, q, r, a, b, cL, cR, n, w=1.5)
     %%
     %
-    % Generate a tridiagonal matrix from the given functions to solve the equation
+    % Generate a tridiagonal matrix from the given functions to solve the
+    % equation
     %
     % y'' = p(x)y'+ q(x)y + r(s), a <= x <= b, f(a) = cL, f(b) = cR
     %
@@ -18,6 +19,7 @@ function [x, y] = ODE_solver(p, q, r, a, b, cL, cR, n)
     %   cL - left boundary condition
     %   cR - right boundary condition
     %   n  - number of subintervals
+    %   w  - relaxation parameter for SOR
     %
     % Output:
     %   
@@ -39,20 +41,6 @@ function [x, y] = ODE_solver(p, q, r, a, b, cL, cR, n)
     rhs = (-h^2 * r(x(2:end-1)))';
     rhs(1) = rhs(1) + (1 + h*p(x(2))/2) * cL;
     rhs(end) = rhs(end) + (1 - h*p(x(end-1))/2) * cR ;
-
-    % Use the optimal w based on size of n
-    switch n
-        case 10
-            w = 1.57;
-        case 20
-            w = 1.75;
-        case 40
-            w = 1.86;
-        case 80
-            w = 1.93;
-        otherwise
-            w = 1.5;
-    end
 
     y = SOR(A, rhs, ones(n-1, 1), 1e-11, w);
     y = [cL; y; cR];
